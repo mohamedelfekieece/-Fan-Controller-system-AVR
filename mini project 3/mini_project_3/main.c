@@ -1,0 +1,74 @@
+/******************************************************************************
+ *
+ * Module: Temperature Sensor
+ *
+ * File Name: lm35_sensor.h
+ *
+ * Description: source file for the main application
+ *
+ * Author: Mohamed Elfeki
+ *
+ *******************************************************************************/
+
+/*******************************************************************************
+                        Includes
+ *******************************************************************************/
+#include "lcd.h"
+#include "lm35_sensor.h"
+#include<avr/io.h>
+#include"gpio.h"
+#include"motor.h"
+
+
+int main(void)
+{
+	GPIO_setupPinDirection(PORTA_ID,PIN2_ID,PIN_INPUT);
+	uint8 temp;
+	LCD_init(); /* initialize LCD driver */
+	DcMotor_init();/* initialize DC Motor driver */
+	LCD_displayStringRowColumn(0,4,"FAN IS ");
+	LCD_displayStringRowColumn(1,4,"Temp =    c");
+
+
+	while(1)
+	{
+		temp=LM35_getTemperature();//get the temperature from lm35 driver
+		LCD_moveCursor(1,11);//move cursor to display the temperature value on LCD
+		if(temp>=100)//condition to display the current temperature on LCD
+		{
+			LCD_intgerToString(temp);
+		}else
+		{
+			LCD_intgerToString(temp);
+			LCD_displayCharacter(' ');
+		}
+
+		LCD_moveCursor(0,11);
+		if(temp >= 120 )//condition to control the fan and control DC Motor speed according to given temperature
+		{
+			DcMotor_rotate(CW,100);
+			LCD_displayString("ON");
+			LCD_displayCharacter(' ');
+		}else if(temp >= 90)
+		{
+			DcMotor_rotate(CW,75);
+			LCD_displayString("ON");
+			LCD_displayCharacter(' ');
+		}else if(temp >= 60)
+		{
+			DcMotor_rotate(CW,50);
+			LCD_displayString("ON");
+			LCD_displayCharacter(' ');
+		}else if(temp >= 30)
+		{
+			DcMotor_rotate(CW,25);
+			LCD_displayString("ON");
+			LCD_displayCharacter(' ');
+		}else
+		{
+			DcMotor_rotate(STOP,0);
+			LCD_displayString("OFF");
+			LCD_displayCharacter(' ');
+		}
+	}
+}
